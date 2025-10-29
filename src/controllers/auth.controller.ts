@@ -39,11 +39,14 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Email ou senha incorretos" });
     }
 
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET || "secret",
+      { expiresIn: "1h" }
+    );
+
     // Aqui você pode criar token JWT se quiser
-    return res.status(200).json({
-      message: "Login bem-sucedido",
-      user: { id: user.id, name: user.name, email: user.email },
-    });
+    return res.json({ message: "Login bem-sucedido", token });
   } catch (error: any) {
     console.error(error);
     res.status(500).json({ error: error.message });
