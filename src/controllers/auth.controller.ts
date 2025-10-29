@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { RowDataPacket } from "mysql2";
 import { Request, Response } from "express";
 import database from "../connection/database";
