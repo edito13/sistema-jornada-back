@@ -58,11 +58,12 @@ export const login = async (req: Request, res: Response) => {
         faculdade,
       },
       token,
+      userRole: "user",
       message: "Login feito com sucesso",
     });
   } catch (error: any) {
     console.error(error);
-    res.status(500).json({ error: error.message });
+    res.json({ error: error.message });
   }
 };
 
@@ -103,6 +104,7 @@ export const register = async (req: Request, res: Response) => {
     return res.status(201).json({
       user,
       token,
+      userRole: "user",
       message: "Usuário registrado com sucesso",
     });
   } catch (error) {
