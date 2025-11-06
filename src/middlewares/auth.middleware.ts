@@ -1,10 +1,16 @@
 import jwt from "jsonwebtoken";
 import { RowDataPacket } from "mysql2";
-import database from "../connection/database";
 import { Request, Response, NextFunction } from "express";
 
+import database from "../connection/database";
+import { JwtPayload, UserData } from "../interfaces";
+
+interface AuthRequest extends Request {
+  user?: UserData;
+}
+
 const authMiddleware = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -20,10 +26,10 @@ const authMiddleware = async (
 
     const secret = process.env.JWT_SECRET as string;
 
-    const { id } = jwt.verify(token, secret) as any;
+    const { id } = jwt.verify(token, secret) as JwtPayload;
 
     const [rows] = await database.query<RowDataPacket[]>(
-      "SELECT id FROM users WHERE id = ?",
+      "SELECT * FROM users WHERE id = ?",
       [id]
     );
 
@@ -31,9 +37,11 @@ const authMiddleware = async (
 
     if (!user) throw "Token inválido!";
 
-    req.userId = user.id;
+    req.user = user as UserData;
     next();
   } catch (error) {
     res.status(403).json({ message: "Token inválido ou expirado" });
   }
 };
+
+export default authMiddleware;
