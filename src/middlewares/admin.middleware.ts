@@ -1,14 +1,9 @@
-import { NextFunction, Response, Request } from "express";
-
-interface AuthenticatedRequest extends Request {
-  user?: {
-    role?: string;
-    [key: string]: any;
-  };
-}
+import { NextFunction, Response } from "express";
+import { UserData } from "../interfaces";
+import { AuthRequest } from "../interfaces/request";
 
 const adminMiddleware = (
-  req: AuthenticatedRequest,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {

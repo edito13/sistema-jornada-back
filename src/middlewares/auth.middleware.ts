@@ -1,13 +1,10 @@
 import jwt from "jsonwebtoken";
 import { RowDataPacket } from "mysql2";
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 
 import database from "../connection/database";
+import { AuthRequest } from "../interfaces/request";
 import { JwtPayload, UserData } from "../interfaces";
-
-interface AuthRequest extends Request {
-  user?: UserData;
-}
 
 const authMiddleware = async (
   req: AuthRequest,
