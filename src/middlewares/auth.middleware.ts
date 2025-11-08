@@ -37,3 +37,4 @@ const authMiddleware = async (
     res.status(403).json({ message: "Token inválido ou expirado" });
   }
 };
+
