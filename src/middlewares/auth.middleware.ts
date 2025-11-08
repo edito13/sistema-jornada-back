@@ -37,7 +37,7 @@ const authMiddleware = async (
     req.user = user as UserData;
     next();
   } catch (error) {
-    res.status(403).json({ message: "Token inválido ou expirado" });
+    res.status(403).json({ message: error ?? "Token inválido ou expirado" });
   }
 };
 

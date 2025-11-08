@@ -1,5 +1,4 @@
 import { NextFunction, Response } from "express";
-import { UserData } from "../interfaces";
 import { AuthRequest } from "../interfaces/request";
 
 const adminMiddleware = (
