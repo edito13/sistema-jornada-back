@@ -7,7 +7,16 @@ export const getUser = async (req: Request, res: Response) => {
 
   try {
     const [data] = await database.query<RowDataPacket[]>(
-      "SELECT id, users.nome, email, role, faculdades.nome AS faculdade FROM users LEFT JOIN faculdades ON users.id_faculdade = faculdades.id_faculdade WHERE users.id = ?",
+      `SELECT 
+          id, 
+          users.nome, 
+          email, 
+          role, 
+          faculdades.nome AS faculdade 
+        FROM users 
+        LEFT JOIN faculdades 
+        ON users.id_faculdade = faculdades.id_faculdade 
+        WHERE users.id = ?`,
       [id]
     );
 
@@ -16,12 +25,6 @@ export const getUser = async (req: Request, res: Response) => {
     }
 
     const user = data[0];
-    // const [result] = await database.query<RowDataPacket[]>(
-    //   "SELECT * from faculdades WHERE id_faculdade = ?",
-    //   [user.id_faculdade]
-    // );
-
-    // const faculdade = result[0] || null;
 
     res.json(user);
   } catch (error) {
