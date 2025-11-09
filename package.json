@@ -4,6 +4,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --watch './**/*.ts' --exec 'ts-node' server.ts",
+    "migrate": "ts-node src/scripts/migrate.ts",
+    "seed": "ts-node src/scripts/seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
