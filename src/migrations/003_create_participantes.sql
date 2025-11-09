@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS participantes (
+  id_participante INT AUTO_INCREMENT PRIMARY KEY,
+  id_user INT NOT NULL,
+  FOREIGN KEY (id_user) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
