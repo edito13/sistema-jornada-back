@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import database from "../connection/database";
+import generateAdmin from "../utils/generateAdmin";
 
 async function runSeeds() {
   const seedsDir = path.resolve("src/seeds");
@@ -20,6 +21,8 @@ async function runSeeds() {
       await connection.query(sql);
       console.log(`✅ Seed executado: ${file}`);
     }
+
+    await generateAdmin();
 
     console.log("🎉 Todos os seeds foram inseridos com sucesso!");
   } catch (error) {

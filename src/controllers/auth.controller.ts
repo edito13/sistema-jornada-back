@@ -1,21 +1,10 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
+import { UserData } from "../interfaces";
 import database from "../connection/database";
 import generateToken from "../utils/generateToken";
-import { UserData } from "../interfaces";
-
-// database
-//   .getConnection()
-//   .then((conn) => {
-//     console.log("Conexão com o banco OK!");
-//     conn.release(); // libera a conexão de volta pro pool
-//   })
-//   .catch((err) => {
-//     console.error("Erro ao conectar no banco:", err);
-//   });
 
 export const login = async (req: Request, res: Response) => {
   try {
@@ -107,14 +96,41 @@ export const register = async (req: Request, res: Response) => {
 };
 
 export const createAdmin = async (req: Request, res: Response) => {
-  const { name, email, password } = req.body;
+  try {
+    const { nome, email, senha } = req.body;
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+    // checar se email já existe
+    const [existingUser] = await database.query<RowDataPacket[]>(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
 
-  await database.query(
-    "INSERT INTO users (nome, email, senha, role) VALUES (?, ?, ?, 'admin')",
-    [name, email, hashedPassword]
-  );
+    if (existingUser.length > 0)
+      return res.status(409).json({ error: "Email já cadastrado" });
 
-  res.status(201).json({ message: "Administrador criado com sucesso" });
+    const hash = await bcrypt.hash(senha, Number(process.env.SALT_ROUNDS));
+
+    const [result] = await database.query<ResultSetHeader>(
+      "INSERT INTO users (nome, email, senha, role) VALUES (?, ?, ?, 'admin')",
+      [nome, email, hash]
+    );
+
+    const [rows] = await database.query<RowDataPacket[]>(
+      "SELECT * FROM users WHERE id = ?",
+      [result.insertId]
+    );
+
+    const user = rows[0];
+
+    const token = generateToken(user as UserData);
+
+    return res.status(201).json({
+      user,
+      token,
+      message: "Administrador criado com sucesso",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, message: "Erro no servidor" });
+  }
 };
