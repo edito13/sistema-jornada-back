@@ -22,11 +22,11 @@ export const createFaculdade = async (req: Request, res: Response) => {
 export const getFaculdades = async (req: Request, res: Response) => {
   try {
     const [data] = await database.query<RowDataPacket[]>(
-      "SELECT * FROM faculdades"
+      "SELECT * FROM faculdades ORDER BY id_faculdade ASC"
     );
 
     res.json(data);
   } catch (error: any) {
-    res.json({ error: error.message });
+    res.json({ error: true, message: error.message });
   }
 };

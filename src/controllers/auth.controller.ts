@@ -1,18 +1,10 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
-import database from "../connection/database";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
-// database
-//   .getConnection()
-//   .then((conn) => {
-//     console.log("Conexão com o banco OK!");
-//     conn.release(); // libera a conexão de volta pro pool
-//   })
-//   .catch((err) => {
-//     console.error("Erro ao conectar no banco:", err);
-//   });
+import { UserData } from "../interfaces";
+import database from "../connection/database";
+import generateToken from "../utils/generateToken";
 
 export const login = async (req: Request, res: Response) => {
   try {
@@ -22,7 +14,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const [rows] = await database.query<RowDataPacket[]>(
-      "SELECT * FROM participantes WHERE email = ?",
+      "SELECT * FROM users WHERE email = ?",
       [email]
     );
 
@@ -43,22 +35,17 @@ export const login = async (req: Request, res: Response) => {
 
     const faculdade = faculdadeRows[0] || null;
 
-    const token = jwt.sign(
-      { id: user.id_participante },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "1d" }
-    );
+    const token = generateToken(user as UserData);
 
-    // Aqui você pode criar token JWT se quiser
     return res.json({
       user: {
-        id_participante: user.id_participante,
+        id: user.id,
         nome: user.nome,
         email: user.email,
+        role: user.role,
         faculdade,
       },
       token,
-      userRole: "user",
       message: "Login feito com sucesso",
     });
   } catch (error: any) {
@@ -73,7 +60,7 @@ export const register = async (req: Request, res: Response) => {
 
     // checar se email já existe
     const [existingUser] = await database.query<RowDataPacket[]>(
-      "SELECT * FROM participantes WHERE email = ?",
+      "SELECT * FROM users WHERE email = ?",
       [email]
     );
 
@@ -84,31 +71,66 @@ export const register = async (req: Request, res: Response) => {
     const hash = await bcrypt.hash(senha, Number(process.env.SALT_ROUNDS));
 
     const [result] = await database.query<ResultSetHeader>(
-      "INSERT INTO participantes (nome, email, senha, id_faculdade) VALUES (?, ?, ?, ?)",
+      "INSERT INTO users (nome, email, senha, id_faculdade, role) VALUES (?, ?, ?, ?, 'user')",
       [nome, email, hash, id_faculdade]
     );
 
     const [rows] = await database.query<RowDataPacket[]>(
-      "SELECT * FROM participantes WHERE id_participante = ?",
+      "SELECT * FROM users WHERE id = ?",
       [result.insertId]
     );
 
     const user = rows[0];
 
-    const token = jwt.sign(
-      { id: user.id_participante },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "1d" }
-    );
+    const token = generateToken(user as UserData);
 
     return res.status(201).json({
       user,
       token,
-      userRole: "user",
       message: "Usuário registrado com sucesso",
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Erro no servidor" });
+  }
+};
+
+export const createAdmin = async (req: Request, res: Response) => {
+  try {
+    const { nome, email, senha } = req.body;
+
+    // checar se email já existe
+    const [existingUser] = await database.query<RowDataPacket[]>(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
+
+    if (existingUser.length > 0)
+      return res.status(409).json({ error: "Email já cadastrado" });
+
+    const hash = await bcrypt.hash(senha, Number(process.env.SALT_ROUNDS));
+
+    const [result] = await database.query<ResultSetHeader>(
+      "INSERT INTO users (nome, email, senha, role) VALUES (?, ?, ?, 'admin')",
+      [nome, email, hash]
+    );
+
+    const [rows] = await database.query<RowDataPacket[]>(
+      "SELECT * FROM users WHERE id = ?",
+      [result.insertId]
+    );
+
+    const user = rows[0];
+
+    const token = generateToken(user as UserData);
+
+    return res.status(201).json({
+      user,
+      token,
+      message: "Administrador criado com sucesso",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: true, message: "Erro no servidor" });
   }
 };
