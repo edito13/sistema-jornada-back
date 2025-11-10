@@ -61,10 +61,10 @@ export const editar_perfil = async (req: AuthRequest, res: Response) => {
     }
 
     if (rows[0].nome != nome) {
-      await database.query(
-        "UPDATE participantes SET nome = ? WHERE id_participante = ?",
-        [nome, id]
-      );
+      await database.query("UPDATE users SET nome = ? WHERE id = ?", [
+        nome,
+        id,
+      ]);
     }
 
     if (rows[0].id_faculdade != id_faculdade) {
@@ -82,7 +82,7 @@ export const editar_perfil = async (req: AuthRequest, res: Response) => {
 
 export const editar_senha = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.user?.id;
     const { senhaantiga, senhanova } = req.body;
 
     //pegar o usuario
