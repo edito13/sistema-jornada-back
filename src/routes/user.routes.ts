@@ -17,6 +17,6 @@ router.get("/:id", getUser);
 
 router.delete("/:id", authMiddleware, deleteUser);
 router.put("/editar_senha/", authMiddleware, editar_senha);
-router.put("/editar_perfil/:id", editar_perfil);
+router.put("/editar_perfil/", authMiddleware, editar_perfil);
 
 export default router;

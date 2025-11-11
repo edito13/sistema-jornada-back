@@ -8,6 +8,6 @@ export interface UserData {
   id: number;
   nome?: string;
   email: string;
-  role: AuthRoles;
+  role?: AuthRoles;
   id_faculdade?: number;
 }

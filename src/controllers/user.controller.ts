@@ -47,7 +47,7 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const editar_perfil = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params; // pegar o token
+    const id = req.user?.id; // pegar o usuário autenticado
     const { nome, id_faculdade } = req.body;
 
     //pegar o usuario com esse id
