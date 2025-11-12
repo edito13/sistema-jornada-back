@@ -10,8 +10,6 @@ import {
 
 const router = Router();
 
-// /user/
-
 router.get("/", getUsers);
 router.get("/:id", getUser);
 
