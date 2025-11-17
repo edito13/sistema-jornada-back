@@ -10,14 +10,14 @@ export const getUser = async (req: Request, res: Response) => {
   try {
     const [data] = await database.query<RowDataPacket[]>(
       `SELECT 
-          id, 
+          users.id, 
           users.nome, 
           email, 
           role, 
           faculdades.nome AS faculdade 
         FROM users 
         LEFT JOIN faculdades 
-        ON users.id_faculdade = faculdades.id_faculdade 
+        ON users.id_faculdade = faculdades.id 
         WHERE users.id = ?`,
       [id]
     );
@@ -37,11 +37,12 @@ export const getUser = async (req: Request, res: Response) => {
 export const getUsers = async (req: Request, res: Response) => {
   try {
     const [data] = await database.query<RowDataPacket[]>(
-      "SELECT id, users.nome, email, role, faculdades.nome AS faculdade FROM users LEFT JOIN faculdades ON users.id_faculdade = faculdades.id_faculdade"
+      "SELECT users.id, users.nome, email, role, faculdades.nome AS faculdade FROM users LEFT JOIN faculdades ON users.id_faculdade = faculdades.id"
     );
     res.json(data);
   } catch (error) {
-    res.status(500).json({ error: "Erro ao buscar usuários" });
+    console.log(error);
+    res.status(500).json({ error: "Erro ao buscar usuários2" });
   }
 };
 

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS certificados (
-  id_certificado INT AUTO_INCREMENT PRIMARY KEY,
+  id INT AUTO_INCREMENT PRIMARY KEY,
   id_inscricao INT NOT NULL,
   codigo_validacao CHAR(10) UNIQUE NOT NULL,
   data_emissao DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_inscricao) REFERENCES inscricoes(id_inscricao) ON DELETE CASCADE
+  FOREIGN KEY (id_inscricao) REFERENCES inscricoes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

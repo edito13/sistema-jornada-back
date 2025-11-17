@@ -35,7 +35,7 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Email ou senha incorrecta" });
 
     const [faculdadeRows] = await database.query<RowDataPacket[]>(
-      "SELECT * FROM faculdades WHERE id_faculdade = ?",
+      "SELECT * FROM faculdades WHERE id = ?",
       [user.id_faculdade]
     );
 
