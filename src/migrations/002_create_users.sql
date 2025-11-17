@@ -5,5 +5,5 @@ CREATE TABLE IF NOT EXISTS users (
   id_faculdade INT NULL,
   senha VARCHAR(255) NOT NULL,
   role ENUM('user', 'admin') NOT NULL DEFAULT 'user',
-  FOREIGN KEY (id_faculdade) REFERENCES faculdades(id_faculdade) ON DELETE SET NULL
+  FOREIGN KEY (id_faculdade) REFERENCES faculdades(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
