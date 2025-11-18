@@ -31,8 +31,10 @@ export const login = async (req: Request, res: Response) => {
     const user = rows[0];
     const match = await bcrypt.compare(senha, user.senha);
 
-    if (!match)
+    if (!match) {
+      console.log("chegou aqui2");
       return res.status(401).json({ error: "Email ou senha incorrecta" });
+    }
 
     const [faculdadeRows] = await database.query<RowDataPacket[]>(
       "SELECT * FROM faculdades WHERE id = ?",
