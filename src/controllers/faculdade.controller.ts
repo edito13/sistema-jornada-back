@@ -51,3 +51,28 @@ export const deleteFaculdade = async (req: Request, res: Response) => {
     res.json({ error: true, message: error.message });
   }
 };
+
+export const editFaculdade = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { nome } = req.body;
+
+    const [result] = await database.query<ResultSetHeader>(
+      "UPDATE faculdades SET nome = ? WHERE id = ?",
+      [nome, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        error: true,
+        message: "Faculdade não encontrada",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Faculdade editada com sucesso",
+    });
+  } catch (error: any) {
+    res.json({ error: true, message: error.message });
+  }
+};
