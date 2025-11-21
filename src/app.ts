@@ -5,6 +5,7 @@ import { PassThrough } from "stream";
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 import faculdadeRoutes from "./routes/faculdade.routes";
+import inscricoesroutes from "./routes/inscricoes.routes";
 
 const app = express();
 
@@ -71,5 +72,6 @@ app.get("/certificado", async (req: Request, res: Response) => {
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
 app.use("/faculdade", faculdadeRoutes);
+app.use("/inscricoes", inscricoesroutes);
 
 export default app;

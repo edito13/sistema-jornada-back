@@ -138,3 +138,4 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: true, message: "Erro no servidor" });
   }
 };
+
