@@ -214,10 +214,59 @@ const createEvent = async (req: AuthRequest, res: Response) => {
 const editEvent = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
+  const {
+    titulo,
+    descricao,
+    local,
+    data_inicio,
+    data_fim,
+    vagas_totais,
+    vagas_disponiveis,
+    id_palestrante,
+    id_faculdade,
+    id_edicao,
+  } = req.body;
+
   try {
-    res.status(200).json({ message: `Evento ${id} editado com sucesso` });
+    const [result] = await database.query<ResultSetHeader>(
+      `UPDATE eventos SET 
+        titulo = ?, 
+        descricao = ?, 
+        local = ?, 
+        data_inicio = ?, 
+        data_fim = ?, 
+        vagas_totais = ?, 
+        vagas_disponiveis = ?, 
+        id_palestrante = ?, 
+        id_faculdade = ?, 
+        id_edicao = ?
+      WHERE id = ?`,
+      [
+        titulo,
+        descricao,
+        local,
+        data_inicio,
+        data_fim,
+        vagas_totais,
+        vagas_disponiveis,
+        id_palestrante,
+        id_faculdade,
+        id_edicao,
+        id,
+      ]
+    );
+
+    if (result.affectedRows > 0) {
+      return res.status(200).json({ message: "Evento editado com sucesso" });
+    }
+
+    return res
+      .status(404)
+      .json({ error: true, message: "Evento não encontrado" });
   } catch (error) {
-    res.status(500).json({ error: true, message: "Erro ao editar o evento" });
+    res
+      .status(500)
+      .json({ error: true, message: "Erro ao atualizar o evento" });
   }
 };
 
@@ -225,7 +274,21 @@ const deleteEvent = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   try {
-    res.status(200).json({ message: `Evento ${id} deletado com sucesso` });
+    const [result] = await database.query<ResultSetHeader>(
+      "DELETE FROM eventos WHERE id = ?",
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        error: true,
+        message: "Evento não encontrado",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Evento deletado com sucesso",
+    });
   } catch (error) {
     res.status(500).json({ error: true, message: "Erro ao deletar o evento" });
   }

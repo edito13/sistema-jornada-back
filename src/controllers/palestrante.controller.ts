@@ -57,13 +57,33 @@ const createPalestrante = async (req: AuthRequest, res: Response) => {
 
 const editPalestrante = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
+  const { nome, email, especialidade } = req.body;
 
   try {
-    res.status(200).json({ message: `Palestrante ${id} editado com sucesso` });
+    const [result] = await database.query<ResultSetHeader>(
+      `UPDATE palestrantes SET 
+        nome = ?, 
+        email = ?, 
+        especialidade = ?
+      WHERE id = ?`,
+      [nome, email, especialidade, id]
+    );
+
+    if (result.affectedRows > 0) {
+      return res
+        .status(200)
+        .json({ message: "Palestrante editado com sucesso" });
+    }
+
+    return res
+      .status(404)
+      .json({ error: true, message: "Palestrante não encontrado" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: true, message: "Erro ao editar palestrante" });
+    console.log(error);
+    return res.status(500).json({
+      error: true,
+      message: "Erro ao atualizar o palestrante",
+    });
   }
 };
 
@@ -71,7 +91,18 @@ const deletePalestrante = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
 
   try {
-    res.status(200).json({ message: `palestrante ${id} deletado com sucesso` });
+    const [result] = await database.query<ResultSetHeader>(
+      "DELETE FROM palestrantes WHERE id = ?",
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ error: true, message: "Palestrante não encontrado" });
+    }
+
+    res.status(200).json({ message: "Palestrante deletado com sucesso" });
   } catch (error) {
     res
       .status(500)
