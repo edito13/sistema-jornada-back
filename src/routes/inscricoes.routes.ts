@@ -8,8 +8,8 @@ import {
 
 const router = Router();
 
-router.post("/inscrever_se/:id", authMiddleware, inscrever_se);
-router.get("/listaInscricoes/:id", authMiddleware, listaInscricoes);
+router.get("/", authMiddleware, listaInscricoes);
+router.post("/", authMiddleware, inscrever_se);
 router.delete("/cancelarInscricao/:id", authMiddleware, cancelarInscricao);
 
 export default router;

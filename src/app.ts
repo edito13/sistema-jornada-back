@@ -23,7 +23,7 @@ app.use("/user", userRoutes);
 app.use("/event", eventsRoutes);
 app.use("/edition", editionRoutes);
 app.use("/faculdade", faculdadeRoutes);
-app.use("/inscricoes", inscricoesRoutes);
+app.use("/inscricao", inscricoesRoutes);
 app.use("/palestrante", palestranteRoutes);
 
 export default app;
