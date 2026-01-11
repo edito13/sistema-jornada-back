@@ -119,63 +119,105 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
 
 export const cancelarInscricao = async (req: AuthRequest, res: Response) => {
   const { user } = req;
-  const { id_evento, id_edicao } = req.body;
-
-  if (!id_evento || !id_edicao) {
-    return res.status(400).json({
-      error: true,
-      message: "id_evento e id_edicao são obrigatórios",
-    });
-  }
+  const { id } = req.params;
 
   const conn = await database.getConnection();
 
   try {
     await conn.beginTransaction();
 
-    /* 1. Buscar participante */
-    const [participantes] = await conn.query<RowDataPacket[]>(
-      "SELECT id FROM participantes WHERE id_user = ?",
-      [user?.id]
-    );
+    if (id) {
+      // Admin canceling by inscription ID
+      if (user?.role !== "admin") {
+        await conn.rollback();
+        return res.status(403).json({
+          error: true,
+          message: "Acesso negado",
+        });
+      }
 
-    if (participantes.length === 0) {
-      await conn.rollback();
-      return res.status(404).json({
-        error: true,
-        message: "Participante não encontrado",
-      });
+      // Get the inscription to find id_evento for updating vagas
+      const [inscricoes] = await conn.query<RowDataPacket[]>(
+        "SELECT id_evento FROM inscricoes WHERE id = ?",
+        [id]
+      );
+
+      if (inscricoes.length === 0) {
+        await conn.rollback();
+        return res.status(404).json({
+          error: true,
+          message: "Inscrição não encontrada",
+        });
+      }
+
+      const idEvento = inscricoes[0].id_evento;
+
+      /* Cancelar inscrição */
+      await conn.query("DELETE FROM inscricoes WHERE id = ?", [id]);
+
+      /* Atualizar vagas */
+      await conn.query(
+        "UPDATE eventos SET vagas_disponiveis = vagas_disponiveis + 1 WHERE id = ?",
+        [idEvento]
+      );
+
+      await conn.commit();
+      return res.json({ message: "Inscrição cancelada com sucesso" });
+    } else {
+      const { id_evento, id_edicao } = req.body;
+      // User canceling by id_evento and id_edicao
+      if (!id_evento || !id_edicao) {
+        return res.status(400).json({
+          error: true,
+          message: "id_evento e id_edicao são obrigatórios",
+        });
+      }
+
+      /* 1. Buscar participante */
+      const [participantes] = await conn.query<RowDataPacket[]>(
+        "SELECT id FROM participantes WHERE id_user = ?",
+        [user?.id]
+      );
+
+      if (participantes.length === 0) {
+        await conn.rollback();
+        return res.status(404).json({
+          error: true,
+          message: "Participante não encontrado",
+        });
+      }
+
+      const id_participante = participantes[0].id;
+
+      /* 2. Buscar inscrição */
+      const [inscricoes] = await conn.query<RowDataPacket[]>(
+        `SELECT id FROM inscricoes
+         WHERE id_participante = ? AND id_evento = ? AND id_edicao = ?`,
+        [id_participante, id_evento, id_edicao]
+      );
+
+      if (inscricoes.length === 0) {
+        await conn.rollback();
+        return res.status(409).json({
+          error: true,
+          message: "O usuário não está inscrito neste evento",
+        });
+      }
+
+      /* 3. Cancelar inscrição */
+      await conn.query("DELETE FROM inscricoes WHERE id = ?", [
+        inscricoes[0].id,
+      ]);
+
+      /* 4. Atualizar vagas */
+      await conn.query(
+        "UPDATE eventos SET vagas_disponiveis = vagas_disponiveis + 1 WHERE id = ?",
+        [id_evento]
+      );
+
+      await conn.commit();
+      return res.json({ message: "Inscrição cancelada com sucesso" });
     }
-
-    const id_participante = participantes[0].id;
-
-    /* 2. Buscar inscrição */
-    const [inscricoes] = await conn.query<RowDataPacket[]>(
-      `SELECT id FROM inscricoes 
-       WHERE id_participante = ? AND id_evento = ? AND id_edicao = ?`,
-      [id_participante, id_evento, id_edicao]
-    );
-
-    if (inscricoes.length === 0) {
-      await conn.rollback();
-      return res.status(409).json({
-        error: true,
-        message: "O usuário não está inscrito neste evento",
-      });
-    }
-
-    /* 3. Cancelar inscrição */
-    await conn.query("DELETE FROM inscricoes WHERE id = ?", [inscricoes[0].id]);
-
-    /* 4. Atualizar vagas */
-    await conn.query(
-      "UPDATE eventos SET vagas_disponiveis = vagas_disponiveis + 1 WHERE id = ?",
-      [id_evento]
-    );
-
-    await conn.commit();
-
-    return res.json({ message: "Inscrição cancelada com sucesso" });
   } catch (error) {
     await conn.rollback();
     return res.status(500).json({
@@ -247,8 +289,14 @@ export const listaInscricoes = async (req: AuthRequest, res: Response) => {
     }
 
     const [inscricoes] = await database.query<RowDataPacket[]>(
-      `SELECT 
+      `SELECT
+        i.id,
+        e.id AS id_evento,
+        ed.id AS id_edicao,
         e.titulo AS titulo_evento,
+        e.local AS local_evento,
+        e.data_inicio AS data_evento,
+        e.vagas_disponiveis AS vagas_disponiveis,
         ed.nome AS nome_edicao,
         ed.ano AS ano_edicao,
         i.data_inscricao,

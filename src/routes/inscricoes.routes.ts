@@ -10,6 +10,7 @@ const router = Router();
 
 router.get("/", authMiddleware, listaInscricoes);
 router.post("/", authMiddleware, inscrever_se);
-router.delete("/cancelarInscricao/:id", authMiddleware, cancelarInscricao);
+router.delete("/", authMiddleware, cancelarInscricao);
+router.delete("/:id", authMiddleware, cancelarInscricao);
 
 export default router;
