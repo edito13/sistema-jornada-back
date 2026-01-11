@@ -9,13 +9,14 @@ export const getCertificate = async (req: Request, res: Response) => {
     const [rows] = await database.query(
       `
       SELECT 
-        p.nome AS nome_participante,
+        u.nome AS nome_participante,
         e.titulo AS titulo_evento,
         c.data_emissao,
         c.codigo_validacao
       FROM certificados c
       JOIN inscricoes i ON c.id_inscricao = i.id
       JOIN participantes p ON i.id_participante = p.id
+      JOIN users u ON u.id = p.id
       JOIN eventos e ON i.id_evento = e.id
       WHERE c.id_inscricao = ?
       `,

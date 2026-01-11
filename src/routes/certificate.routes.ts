@@ -5,9 +5,9 @@ import { getCertificate } from "../controllers/certificate.controller";
 
 const router = Router();
 
-router.get("/certificado/:id_inscricao", getCertificate);
+router.get("/:id_inscricao", getCertificate);
 
-router.get("/certificado", async (req, res) => {
+router.get("/", async (req, res) => {
   const doc = new PDFDocument({
     size: "A4",
     layout: "landscape",

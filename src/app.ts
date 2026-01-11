@@ -8,6 +8,7 @@ import editionRoutes from "./routes/edition.routes";
 import faculdadeRoutes from "./routes/faculdade.routes";
 import inscricoesRoutes from "./routes/inscricoes.routes";
 import palestranteRoutes from "./routes/palestrante.routes";
+import certificateRoutes from "./routes/certificate.routes";
 
 const app = express();
 
@@ -25,5 +26,6 @@ app.use("/edition", editionRoutes);
 app.use("/faculdade", faculdadeRoutes);
 app.use("/inscricao", inscricoesRoutes);
 app.use("/palestrante", palestranteRoutes);
+app.use("/certificado", certificateRoutes);
 
 export default app;
