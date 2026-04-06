@@ -6,6 +6,7 @@ import { getCertificate } from "../controllers/certificate.controller";
 const router = Router();
 
 router.get("/:id_inscricao", getCertificate);
+router.get("/usuario/:id_user", (req, res) => res.json([]));
 
 router.get("/", async (req, res) => {
   const doc = new PDFDocument({
@@ -55,7 +56,7 @@ router.get("/", async (req, res) => {
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
-    `attachment; filename=certificado_teste.pdf`
+    `attachment; filename=certificado_teste.pdf`,
   );
   res.send(pdfBuffer);
 });

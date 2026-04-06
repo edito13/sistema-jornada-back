@@ -26,6 +26,6 @@ app.use("/edition", editionRoutes);
 app.use("/faculdade", faculdadeRoutes);
 app.use("/inscricao", inscricoesRoutes);
 app.use("/palestrante", palestranteRoutes);
-app.use("/certificado", certificateRoutes);
+app.use("/certificados", certificateRoutes);
 
 export default app;

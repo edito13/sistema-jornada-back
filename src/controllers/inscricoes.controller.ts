@@ -2,6 +2,9 @@ import { Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import database from "../connection/database";
 import { AuthRequest } from "../interfaces/request";
+import nodemailer from "nodemailer";
+import QRCode from "qrcode";
+import jwt from "jsonwebtoken";
 
 export const inscrever_se = async (req: AuthRequest, res: Response) => {
   const { user } = req;
@@ -22,7 +25,7 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
     /* 1. Validar usuário */
     const [users] = await conn.query<RowDataPacket[]>(
       "SELECT id FROM users WHERE id = ?",
-      [user?.id]
+      [user?.id],
     );
 
     if (users.length === 0) {
@@ -38,7 +41,7 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
       `SELECT id, vagas_disponiveis 
        FROM eventos 
        WHERE id = ? AND id_edicao = ?`,
-      [id_evento, id_edicao]
+      [id_evento, id_edicao],
     );
 
     if (eventos.length === 0) {
@@ -60,7 +63,7 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
     /* 3. Buscar ou criar participante */
     const [participantes] = await conn.query<RowDataPacket[]>(
       "SELECT id FROM participantes WHERE id_user = ?",
-      [user?.id]
+      [user?.id],
     );
 
     let id_participante: number;
@@ -68,7 +71,7 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
     if (participantes.length === 0) {
       const [result] = await conn.query<ResultSetHeader>(
         "INSERT INTO participantes (id_user) VALUES (?)",
-        [user?.id]
+        [user?.id],
       );
       id_participante = result.insertId;
     } else {
@@ -79,7 +82,7 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
     const [inscricaoExistente] = await conn.query<RowDataPacket[]>(
       `SELECT id FROM inscricoes
        WHERE id_participante = ? AND id_evento = ? AND id_edicao = ?`,
-      [id_participante, id_evento, id_edicao]
+      [id_participante, id_evento, id_edicao],
     );
 
     if (inscricaoExistente.length > 0) {
@@ -93,16 +96,46 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
     /* 5. Criar inscrição */
     await conn.query(
       "INSERT INTO inscricoes (id_participante, id_evento, id_edicao, data_inscricao) VALUES (?, ?, ?, NOW())",
-      [id_participante, id_evento, id_edicao]
+      [id_participante, id_evento, id_edicao],
     );
 
     /* 6. Atualizar vagas */
     await conn.query(
       "UPDATE eventos SET vagas_disponiveis = vagas_disponiveis - 1 WHERE id = ?",
-      [id_evento]
+      [id_evento],
     );
 
     await conn.commit();
+
+    const jornadaUrl = `http://localhost:5173/jornada/${user?.id}/${eventos[0].id}`;
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const qrCodeBuffer = await QRCode.toBuffer(jornadaUrl);
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: "ricardocarlos1306@gmail.com",
+      subject: "Inscrição confirmada 🎉",
+      html: `
+    <p>Olá, ${participantes[0].nome ?? "Não tem nome"}</p>
+    <p>Use o QR Code abaixo:</p>
+    <img src="cid:qrcode" />
+  `,
+      attachments: [
+        {
+          filename: "qrcode.png",
+          content: qrCodeBuffer,
+          cid: "qrcode", // liga com o img
+        },
+      ],
+    });
 
     return res.json({ message: "Inscrição realizada com sucesso" });
   } catch (error) {
@@ -139,7 +172,7 @@ export const cancelarInscricao = async (req: AuthRequest, res: Response) => {
       // Get the inscription to find id_evento for updating vagas
       const [inscricoes] = await conn.query<RowDataPacket[]>(
         "SELECT id_evento FROM inscricoes WHERE id = ?",
-        [id]
+        [id],
       );
 
       if (inscricoes.length === 0) {
@@ -158,7 +191,7 @@ export const cancelarInscricao = async (req: AuthRequest, res: Response) => {
       /* Atualizar vagas */
       await conn.query(
         "UPDATE eventos SET vagas_disponiveis = vagas_disponiveis + 1 WHERE id = ?",
-        [idEvento]
+        [idEvento],
       );
 
       await conn.commit();
@@ -176,7 +209,7 @@ export const cancelarInscricao = async (req: AuthRequest, res: Response) => {
       /* 1. Buscar participante */
       const [participantes] = await conn.query<RowDataPacket[]>(
         "SELECT id FROM participantes WHERE id_user = ?",
-        [user?.id]
+        [user?.id],
       );
 
       if (participantes.length === 0) {
@@ -193,7 +226,7 @@ export const cancelarInscricao = async (req: AuthRequest, res: Response) => {
       const [inscricoes] = await conn.query<RowDataPacket[]>(
         `SELECT id FROM inscricoes
          WHERE id_participante = ? AND id_evento = ? AND id_edicao = ?`,
-        [id_participante, id_evento, id_edicao]
+        [id_participante, id_evento, id_edicao],
       );
 
       if (inscricoes.length === 0) {
@@ -212,7 +245,7 @@ export const cancelarInscricao = async (req: AuthRequest, res: Response) => {
       /* 4. Atualizar vagas */
       await conn.query(
         "UPDATE eventos SET vagas_disponiveis = vagas_disponiveis + 1 WHERE id = ?",
-        [id_evento]
+        [id_evento],
       );
 
       await conn.commit();
@@ -251,7 +284,7 @@ export const listaInscricoes = async (req: AuthRequest, res: Response) => {
         JOIN users u ON p.id_user = u.id
         JOIN eventos e ON i.id_evento = e.id
         JOIN edicoes ed ON i.id_edicao = ed.id
-        ORDER BY i.data_inscricao DESC`
+        ORDER BY i.data_inscricao DESC`,
       );
 
       const inscricoes = rows.map((row: any) => ({
@@ -278,7 +311,7 @@ export const listaInscricoes = async (req: AuthRequest, res: Response) => {
 
     const [participantes] = await database.query<RowDataPacket[]>(
       "SELECT id FROM participantes WHERE id_user = ?",
-      [user?.id]
+      [user?.id],
     );
 
     if (participantes.length === 0) {
@@ -306,7 +339,7 @@ export const listaInscricoes = async (req: AuthRequest, res: Response) => {
       JOIN edicoes ed ON i.id_edicao = ed.id
       WHERE i.id_participante = ?
       ORDER BY i.data_inscricao DESC`,
-      [participantes[0].id]
+      [participantes[0].id],
     );
 
     return res.json(inscricoes);
