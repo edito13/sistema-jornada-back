@@ -124,15 +124,63 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
       to: "ricardocarlos1306@gmail.com",
       subject: "Inscrição confirmada 🎉",
       html: `
-    <p>Olá, ${participantes[0].nome ?? "Não tem nome"}</p>
-    <p>Use o QR Code abaixo:</p>
-    <img src="cid:qrcode" />
+  <div style="margin:0;padding:0;background-color:#f4f6f8;font-family:Arial,sans-serif;">
+    <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:auto;background:#ffffff;border-radius:10px;overflow:hidden;">
+      
+      <!-- HEADER -->
+      <tr>
+        <td style="border-bottom:3px solid #b30000;padding:16px;text-align:center;">
+          <img src="https://www.unic.co.ao/themes/theme-cuanza/logos/logo-cuanza.svg" 
+               alt="Universidade Cuanza" 
+               style="max-width:180px;">
+        </td>
+      </tr>
+
+      <!-- BODY -->
+      <tr>
+        <td style="padding:30px;text-align:center;">
+          <h2 style="color:#b30000;margin-bottom:10px;">Inscrição Confirmada 🎉</h2>
+          
+          <p style="color:#333;font-size:16px;">
+            Olá, <strong>${participantes[0].nome ?? "Participante"}</strong>
+          </p>
+
+          <p style="color:#555;font-size:14px;line-height:1.6;">
+            Sua inscrição na <strong>Jornada Científica</strong> foi confirmada com sucesso.
+          </p>
+
+          <p style="color:#555;font-size:14px;">
+            Apresente o QR Code abaixo no dia do evento:
+          </p>
+
+          <!-- QR CODE -->
+          <div style="margin:20px 0;">
+            <img src="cid:qrcode" 
+                 style="width:200px;height:200px;border:1px solid #eee;border-radius:8px;padding:6px;background:#fafafa;" />
+          </div>
+
+          <p style="color:#888;font-size:12px;">
+            Guarde este email, ele será necessário para validação no dia do evento. Será pedido para que mostres esse <strong>QR Code na porta</strong> e assim a sua inscrição será <strong>confirmada pela sua presença.</strong>
+          </p>
+        </td>
+      </tr>
+
+      <!-- FOOTER -->
+      <tr>
+        <td style="background:#f4f6f8;padding:20px;text-align:center;font-size:12px;color:#777;">
+          © ${new Date().getFullYear()} Jornada Científica <br/>
+          Universidade Internacional do Cuanza • Todos os direitos reservados
+        </td>
+      </tr>
+
+    </table>
+  </div>
   `,
       attachments: [
         {
           filename: "qrcode.png",
           content: qrCodeBuffer,
-          cid: "qrcode", // liga com o img
+          cid: "qrcode",
         },
       ],
     });
