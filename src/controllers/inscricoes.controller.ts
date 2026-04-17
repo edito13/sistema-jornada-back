@@ -124,7 +124,7 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
       to: "ricardocarlos1306@gmail.com",
       subject: "Inscrição confirmada 🎉",
       html: `
-    <p>Olá, ${participantes[0].nome ?? "Não tem nome"}</p>
+    <p>Olá, ${participantes[0]?.nome ?? "Não tem nome"}</p>
     <p>Use o QR Code abaixo:</p>
     <img src="cid:qrcode" />
   `,
