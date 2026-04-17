@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --watch ./ --ext ts --exec ts-node server.ts",
+    "dev": "nodemon --watch ./ --ext ts --exec ts-node src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "migrate": "ts-node src/scripts/migrate.ts",
