@@ -1,0 +1,16 @@
+{
+	"development": {
+		"username": "User1",
+		"password": "jornada620",
+		"database": "jornadaC",
+		"host": "127.0.0.1",
+		"dialect": "mysql"
+	},
+	"production": {
+		"username": "User1",
+		"password": "jornada620",
+		"database":"jornadaC",
+		"host": "127.0.0.1",
+		"dialect": "mysql"
+	}
+}
