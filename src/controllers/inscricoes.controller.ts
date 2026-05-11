@@ -24,7 +24,7 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
 
     /* 1. Validar usuário */
     const [users] = await conn.query<RowDataPacket[]>(
-      "SELECT id FROM users WHERE id = ?",
+      "SELECT id, nome, email FROM users WHERE id = ?",
       [user?.id],
     );
 
@@ -121,7 +121,7 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: "ricardocarlos1306@gmail.com",
+      to: users[0].email,
       subject: "Inscrição confirmada 🎉",
       html: `
   <div style="margin:0;padding:0;background-color:#f4f6f8;font-family:Arial,sans-serif;">
@@ -142,7 +142,7 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
           <h2 style="color:#b30000;margin-bottom:10px;">Inscrição Confirmada 🎉</h2>
           
           <p style="color:#333;font-size:16px;">
-            Olá, <strong>${participantes[0].nome ?? "Participante"}</strong>
+            Olá, <strong>${users[0].nome ?? "Participante"}</strong>
           </p>
 
           <p style="color:#555;font-size:14px;line-height:1.6;">
