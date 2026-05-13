@@ -107,7 +107,7 @@ export const inscrever_se = async (req: AuthRequest, res: Response) => {
 
     await conn.commit();
 
-    const jornadaUrl = `http://localhost:5173/jornada/${user?.id}/${eventos[0].id}`;
+    const jornadaUrl = `http://www.jornadacientifica.unic.co.ao/${user?.id}/${eventos[0].id}`;
 
     const transporter = nodemailer.createTransport({
       service: "gmail",

@@ -12,9 +12,22 @@
     "resolveJsonModule": true,
     "noImplicitAny": true,
     "sourceMap": true,
-    "typeRoots": ["./node_modules/@types", "./src/types", "./src/interfaces"],
-    "types": ["node", "express"]
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types",
+      "./src/interfaces"
+    ],
+    "types": [
+      "node",
+      "express"
+    ]
   },
-  "include": ["src/**/*", "server.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*",
+    "src/server.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
