@@ -12,6 +12,8 @@ async function runSeeds() {
 
   const connection = await database.getConnection();
 
+  let exitCode = 0;
+
   try {
     console.log("🌱 Iniciando seed dos dados...");
 
@@ -26,10 +28,11 @@ async function runSeeds() {
 
     console.log("🎉 Todos os seeds foram inseridos com sucesso!");
   } catch (error) {
+    exitCode = 1;
     console.error("❌ Erro ao rodar seeds:", error);
   } finally {
     connection.release();
-    process.exit(0);
+    process.exit(exitCode);
   }
 }
 

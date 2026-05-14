@@ -4,10 +4,17 @@ import database from "../connection/database";
 
 dotenv.config();
 
-const generateAdmin = async () => {
+const generateAdmin = async () => { 
   const email = "admin@sistema.com";
   const nome = "Administrador";
-  const senha = process.env.ADMIN_PWD as string;
+  const senha = process.env.ADMIN_PWD;
+
+  if (!senha) {
+    throw new Error(
+      "ADMIN_PWD environment variable is required to generate the admin user. Set it in your .env file."
+    );
+  }
+
   const saltRounds = 10;
   const hash = await bcrypt.hash(senha, saltRounds);
 
