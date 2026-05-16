@@ -21,7 +21,7 @@ export const login = async (req: Request, res: Response) => {
 
     const [rows] = await database.query<RowDataPacket[]>(
       "SELECT * FROM users WHERE email = ?",
-      [email]
+      [email],
     );
 
     if (rows.length === 0) {
@@ -37,7 +37,7 @@ export const login = async (req: Request, res: Response) => {
 
     const [faculdadeRows] = await database.query<RowDataPacket[]>(
       "SELECT * FROM faculdades WHERE id = ?",
-      [user.id_faculdade]
+      [user.id_faculdade],
     );
 
     const faculdade = faculdadeRows[0] || null;
@@ -68,7 +68,7 @@ export const register = async (req: Request, res: Response) => {
     // checar se email já existe
     const [existingUser] = await database.query<RowDataPacket[]>(
       "SELECT * FROM users WHERE email = ?",
-      [email]
+      [email],
     );
 
     if (existingUser.length > 0)
@@ -79,12 +79,12 @@ export const register = async (req: Request, res: Response) => {
 
     const [result] = await database.query<ResultSetHeader>(
       "INSERT INTO users (nome, email, senha, id_faculdade, role) VALUES (?, ?, ?, ?, 'user')",
-      [nome, email, hash, id_faculdade]
+      [nome, email, hash, id_faculdade],
     );
 
     const [rows] = await database.query<RowDataPacket[]>(
       "SELECT * FROM users WHERE id = ?",
-      [result.insertId]
+      [result.insertId],
     );
 
     const user = rows[0];
@@ -109,7 +109,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
     // Verifica se o email existe
     const [users] = await database.query<RowDataPacket[]>(
       "SELECT id, nome FROM users WHERE email = ?",
-      [email]
+      [email],
     );
     if (users.length === 0) {
       return res.status(404).json({ message: "Usuário não encontrado" });
@@ -124,11 +124,11 @@ export const forgetPassword = async (req: Request, res: Response) => {
     // Salva o token na tabela password_resets
     await database.query(
       "INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)",
-      [user.id, resetToken, expiresAt]
+      [user.id, resetToken, expiresAt],
     );
 
     // Envia o link de redefinição
-    const resetUrl = `http://localhost:5173/resetar-senha/${resetToken}`;
+    const resetUrl = `${process.env.NODE_ENV === "production" ? "http://www.jornadacientifica.unic.co.ao" : "http://localhost:5173"}/resetar-senha/${resetToken}`;
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -166,7 +166,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     // 2️⃣ Verifica se o token ainda está válido no banco
     const [rows] = await database.query<RowDataPacket[]>(
       "SELECT * FROM password_resets WHERE token = ? AND used = FALSE AND expires_at > NOW()",
-      [token]
+      [token],
     );
 
     if (rows.length === 0) {
@@ -178,7 +178,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     // 3️⃣ Criptografa a nova senha e atualiza
     const hash = await bcrypt.hash(
       newPassword,
-      Number(process.env.SALT_ROUNDS)
+      Number(process.env.SALT_ROUNDS),
     );
     await database.query("UPDATE users SET senha = ? WHERE id = ?", [
       hash,
@@ -188,7 +188,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     // 4️⃣ Marca o token como usado
     await database.query(
       "UPDATE password_resets SET used = TRUE WHERE id = ?",
-      [resetEntry.id]
+      [resetEntry.id],
     );
 
     res.json({ message: "Senha redefinida com sucesso!" });
@@ -205,7 +205,7 @@ export const createAdmin = async (req: Request, res: Response) => {
     // checar se email já existe
     const [existingUser] = await database.query<RowDataPacket[]>(
       "SELECT * FROM users WHERE email = ?",
-      [email]
+      [email],
     );
 
     if (existingUser.length > 0)
@@ -215,12 +215,12 @@ export const createAdmin = async (req: Request, res: Response) => {
 
     const [result] = await database.query<ResultSetHeader>(
       "INSERT INTO users (nome, email, senha, role) VALUES (?, ?, ?, 'admin')",
-      [nome, email, hash]
+      [nome, email, hash],
     );
 
     const [rows] = await database.query<RowDataPacket[]>(
       "SELECT * FROM users WHERE id = ?",
-      [result.insertId]
+      [result.insertId],
     );
 
     const user = rows[0];
