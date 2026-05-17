@@ -175,16 +175,21 @@ export const getCertificate = async (req: AuthRequest, res: Response) => {
   try {
     const [rows] = await database.query(
       `
-      SELECT 
+      SELECT
         u.nome AS nome_participante,
         e.titulo AS titulo_evento,
         e.data_fim,
         i.presenca,
-        p.id_user
+        p.id_user,
+        pal.nome AS nome_palestrante,
+        TIMESTAMPDIFF(HOUR, e.data_inicio, e.data_fim) AS duracao_horas,
+        ed.nome AS nome_edicao
       FROM inscricoes i
       JOIN participantes p ON i.id_participante = p.id
       JOIN users u ON u.id = p.id_user
       JOIN eventos e ON i.id_evento = e.id
+      JOIN palestrantes pal ON e.id_palestrante = pal.id
+      JOIN edicoes ed ON i.id_edicao = ed.id
       WHERE i.id = ?
       `,
       [id_inscricao],
