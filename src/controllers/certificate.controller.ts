@@ -1,8 +1,9 @@
 import { Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
+
 import database from "../connection/database";
-import { generateCertificate } from "../utils/generateCertificates";
 import { AuthRequest } from "../interfaces/request";
+import { generateCertificate } from "../utils/generateCertificates";
 
 const createValidationCode = () =>
   Math.random().toString(36).slice(2, 12).toUpperCase();
@@ -186,7 +187,7 @@ export const getCertificate = async (req: AuthRequest, res: Response) => {
       JOIN eventos e ON i.id_evento = e.id
       WHERE i.id = ?
       `,
-      [id_inscricao]
+      [id_inscricao],
     );
 
     const [inscricao] = rows as any[];
